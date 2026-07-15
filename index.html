@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="GreenHatx kişisel sitesi. Bilgi güvenliği, DLP, veritabanı güvenliği ve otomasyon notları." />
+  <title>Serseri | GreenHatx</title>
+  <style>
+    :root {
+      --bg: #020403;
+      --panel: rgba(5, 18, 12, 0.78);
+      --green: #37ff8b;
+      --green-soft: #8fffc0;
+      --cyan: #49d9ff;
+      --red: #ff4d6d;
+      --text: #d8ffe7;
+      --muted: #7da58b;
+      --border: rgba(55, 255, 139, 0.26);
+      --shadow: 0 0 34px rgba(55, 255, 139, 0.18);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      min-height: 100%;
+    }
+
+    body {
+      margin: 0;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      background:
+        radial-gradient(circle at 20% 10%, rgba(55, 255, 139, 0.12), transparent 32rem),
+        radial-gradient(circle at 80% 30%, rgba(73, 217, 255, 0.10), transparent 30rem),
+        var(--bg);
+      color: var(--text);
+      overflow-x: hidden;
+    }
+
+    canvas {
+      position: fixed;
+      inset: 0;
+      z-index: -2;
+      opacity: 0.34;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      pointer-events: none;
+      background: repeating-linear-gradient(
+        to bottom,
+        rgba(255, 255, 255, 0.035) 0,
+        rgba(255, 255, 255, 0.035) 1px,
+        transparent 1px,
+        transparent 4px
+      );
+      mix-blend-mode: overlay;
+    }
+
+    .shell {
+      width: min(1120px, calc(100% - 32px));
+      min-height: 100vh;
+      margin: 0 auto;
+      padding: 28px 0 34px;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 22px;
+    }
+
+    header,
+    footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--green-soft);
+      letter-spacing: 0;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 16px var(--green);
+    }
+
+    nav {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    a {
+      color: var(--green-soft);
+      text-decoration: none;
+    }
+
+    a:hover {
+      color: var(--cyan);
+    }
+
+    main {
+      display: grid;
+      align-items: center;
+      grid-template-columns: minmax(0, 1.1fr) minmax(300px, 0.9fr);
+      gap: 26px;
+    }
+
+    .terminal {
+      border: 1px solid var(--border);
+      background: linear-gradient(180deg, rgba(7, 20, 14, 0.92), rgba(3, 9, 7, 0.92));
+      box-shadow: var(--shadow);
+      min-height: 520px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .terminal::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      pointer-events: none;
+    }
+
+    .bar {
+      height: 42px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 14px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(0, 0, 0, 0.28);
+    }
+
+    .led {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+    }
+
+    .led.red {
+      background: #ff5f56;
+    }
+
+    .led.yellow {
+      background: #ffbd2e;
+    }
+
+    .led.green {
+      background: #27c93f;
+    }
+
+    .path {
+      margin-left: 10px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .content {
+      padding: clamp(22px, 4vw, 42px);
+    }
+
+    .kicker {
+      color: var(--cyan);
+      font-size: 14px;
+      margin-bottom: 18px;
+    }
+
+    h1 {
+      margin: 0;
+      color: var(--green);
+      font-size: clamp(44px, 9vw, 104px);
+      line-height: 0.9;
+      letter-spacing: 0;
+      text-shadow: 0 0 24px rgba(55, 255, 139, 0.38);
+    }
+
+    .cursor {
+      display: inline-block;
+      width: 0.58em;
+      height: 0.12em;
+      background: var(--green);
+      margin-left: 8px;
+      animation: blink 1s steps(2) infinite;
+      box-shadow: 0 0 18px var(--green);
+    }
+
+    @keyframes blink {
+      50% {
+        opacity: 0;
+      }
+    }
+
+    .lead {
+      max-width: 760px;
+      margin: 24px 0 0;
+      color: #b7f8cc;
+      font-size: clamp(16px, 2vw, 20px);
+      line-height: 1.65;
+    }
+
+    .cmds {
+      margin-top: 30px;
+      display: grid;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .cmds span {
+      color: var(--green-soft);
+    }
+
+    .cmds b {
+      color: var(--red);
+      font-weight: 600;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 34px;
+    }
+
+    .btn {
+      min-height: 44px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 16px;
+      border: 1px solid var(--border);
+      background: rgba(55, 255, 139, 0.08);
+      color: var(--green-soft);
+      box-shadow: 0 0 18px rgba(55, 255, 139, 0.10);
+    }
+
+    .btn.primary {
+      background: var(--green);
+      color: #011407;
+      font-weight: 800;
+    }
+
+    .side {
+      display: grid;
+      gap: 14px;
+    }
+
+    .card {
+      border: 1px solid var(--border);
+      background: var(--panel);
+      padding: 18px;
+      box-shadow: var(--shadow);
+    }
+
+    .card h2 {
+      margin: 0 0 12px;
+      font-size: 15px;
+      color: var(--cyan);
+      font-weight: 700;
+    }
+
+    .card p,
+    .card li {
+      color: #beeccc;
+      line-height: 1.55;
+      font-size: 14px;
+    }
+
+    .card p {
+      margin: 0;
+    }
+
+    ul {
+      margin: 0;
+      padding-left: 18px;
+    }
+
+    .meter {
+      height: 8px;
+      margin-top: 10px;
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.05);
+      overflow: hidden;
+    }
+
+    .meter div {
+      height: 100%;
+      background: linear-gradient(90deg, var(--green), var(--cyan));
+      box-shadow: 0 0 16px var(--green);
+    }
+
+    footer {
+      border-top: 1px solid var(--border);
+      padding-top: 16px;
+    }
+
+    @media (max-width: 860px) {
+      main {
+        grid-template-columns: 1fr;
+      }
+
+      header,
+      footer {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      nav {
+        justify-content: flex-start;
+      }
+
+      .terminal {
+        min-height: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="matrix" aria-hidden="true"></canvas>
+
+  <div class="shell">
+    <header>
+      <div class="brand"><span class="dot"></span> greenhatx://personal-site</div>
+      <nav>
+        <a href="https://github.com/GreenHatx">github</a>
+        <a href="mailto:cdolen99@gmail.com">contact</a>
+        <a href="#notes">notes</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="terminal" aria-label="Profil terminali">
+        <div class="bar">
+          <span class="led red"></span>
+          <span class="led yellow"></span>
+          <span class="led green"></span>
+          <span class="path">/home/serseri/profile</span>
+        </div>
+
+        <div class="content">
+          <div class="kicker">$ whoami</div>
+          <h1>Serseri<span class="cursor"></span></h1>
+          <p class="lead">
+            Bilgi güvenliği, DLP testleri, veritabanı güvenliği ve yazılım geliştirme üzerine çalışan bir üretici.
+            Amacım sade araçlar, net notlar ve işe yarayan teknik izler bırakmak.
+          </p>
+
+          <div class="cmds" aria-label="Komut çıktıları">
+            <div><span>$ cat focus.txt</span> bilgi-guvenligi / dlp / database-security / automation</div>
+            <div><span>$ status</span> online, curious, building</div>
+            <div><span>$ motto</span> <b>measure twice, exploit never without permission</b></div>
+          </div>
+
+          <div class="actions">
+            <a class="btn primary" href="https://github.com/GreenHatx">GitHub Profil</a>
+            <a class="btn" href="https://github.com/GreenHatx?tab=repositories">Projeler</a>
+          </div>
+        </div>
+      </section>
+
+      <aside class="side" id="notes">
+        <article class="card">
+          <h2>ACCESS LEVEL</h2>
+          <p>Green hat mindset. Savunma odaklı araştırma, temiz raporlama, kontrollü test.</p>
+          <div class="meter"><div style="width: 87%"></div></div>
+        </article>
+
+        <article class="card">
+          <h2>SKILLSET</h2>
+          <ul>
+            <li>DLP değerlendirme ve senaryo tasarımı</li>
+            <li>Web güvenliği ve otomasyon</li>
+            <li>SQL, veritabanı güvenliği ve log analizi</li>
+            <li>Python, Linux, GitHub Pages</li>
+          </ul>
+        </article>
+
+        <article class="card">
+          <h2>LATEST SIGNAL</h2>
+          <p>Bu site GitHub Pages üzerinde statik olarak yayınlanır. Hızlıdır, ucuzdur, saldırı yüzeyi düşüktür.</p>
+        </article>
+      </aside>
+    </main>
+
+    <footer>
+      <span>© 2026 GreenHatx</span>
+      <span>served via GitHub Pages · no cookies · no trackers</span>
+    </footer>
+  </div>
+
+  <script>
+    const canvas = document.getElementById("matrix");
+    const ctx = canvas.getContext("2d");
+    const chars = "01ABCDEFGHIJKLMNOPQRSTUVWXYZ#$%&+-*/{}[]<>".split("");
+    let columns = [];
+    const size = 15;
+
+    function resize() {
+      canvas.width = window.innerWidth * devicePixelRatio;
+      canvas.height = window.innerHeight * devicePixelRatio;
+      ctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
+      const count = Math.ceil(window.innerWidth / size);
+      columns = Array.from({ length: count }, () => Math.random() * window.innerHeight / size);
+    }
+
+    function draw() {
+      ctx.fillStyle = "rgba(2, 4, 3, 0.12)";
+      ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
+      ctx.fillStyle = "#37ff8b";
+      ctx.font = size + "px monospace";
+
+      columns.forEach((y, i) => {
+        const text = chars[Math.floor(Math.random() * chars.length)];
+        ctx.fillText(text, i * size, y * size);
+        columns[i] = y * size > window.innerHeight && Math.random() > 0.975 ? 0 : y + 1;
+      });
+
+      requestAnimationFrame(draw);
+    }
+
+    window.addEventListener("resize", resize);
+    resize();
+    draw();
+  </script>
+</body>
+</html>
